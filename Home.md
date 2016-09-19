@@ -1,4 +1,4 @@
-# uftrace Home
+# Overview
 
 uftrace is a tool to trace and analyze execution of a program written in C/C++.  It was inspired by Linux kernel's ftrace (especially function graph tracer), and supports userspace programs on Linux.  In order to use uftrace, the program should be compiled with `-pg` or `-finstrument-functions` option.  (On ARM platforms, you may need to add `-fno-omit-frame-pointer` option also).  The example output looks like below:
 
