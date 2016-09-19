@@ -1,4 +1,4 @@
-#uftrace usage
+#basic usage
 The uftrace tool consists of several subcommands.  We'll see how to use them with simple examples in this document.
 
 ## Getting started
