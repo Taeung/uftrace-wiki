@@ -141,3 +141,16 @@ The last type of filter is a time-based one.  It will show functions running lon
        1.080 ms [27154] | } /* main */
 
 Above show functions run longer than 100 us when replaying the hello world program.  You can see that reading map file and symbol file takes most of time.
+
+In addition, it can also access function arguments and return value.  You can use the `-A` or `--argument` option to access the arguments and likewise, `-R` or `--return` option for return value.  (Currently) it needs to pass function name and argument/return value specifier(s).
+
+    $ uftrace -A puts@arg1/s -R main@retval hello
+    Hello world
+    # DURATION    TID     FUNCTION
+       2.619 us [27961] | __monstartup();
+       2.014 us [27961] | __cxa_atexit();
+                [27961] | main() {
+       8.256 us [27961] |   puts("Hello world");
+       9.996 us [27961] | } = 0; /* main */
+
+The first argument of "puts" function is the string so it needs to add "/s" format specifier at the end.  By default integer type is assumed so retval has no format specifier.  For more information please refer the manual page.
