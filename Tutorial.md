@@ -154,3 +154,77 @@ In addition, it can also access function arguments and return value.  You can us
        9.996 us [27961] | } = 0; /* main */
 
 The first argument of "puts" function is the string so it needs to add "/s" format specifier at the end.  By default integer type is assumed so retval has no format specifier.  For more information please refer the manual page.
+
+## Replaying the trace
+Once you recorded the trace data of your program, you can use it to see the execution of program.  As uftrace saved all the information to replay the trace, it's also easy to do it on a different machine by simply copying the data directory (uftrace.data) and running `uftrace replay` on it.  Most of filtering (except time filter) also works for replay.
+
+Let's take a look at the following silly program.
+
+    $ cat foobar.c
+    #include <pthread.h>
+    
+    void *bar(void) {
+      return NULL;
+    }
+    
+    void *foo(void *unused) {
+      return bar();
+    }
+    
+    int main(int argc, char *argv[]) {
+      pthread_t th;
+    
+      foo(argv);
+      pthread_create(&th, NULL, foo, NULL);
+      pthread_join(th, NULL);
+      return 0;
+    }
+
+It creates a thread and calls foo (and bar) function from the two thread each.  Compile and record the program like below:
+
+    $ gcc -o foobar -pg -pthread foobar.c
+    $ uftrace record foobar
+
+Now `replay` shows the execution of program.  Note that it uses a pager program (usually "less" - use can set "PAGER" environment variable to change) to control the terminal output easily.  If you don't want it for some reason, you might use `--no-pager` option or set the "PAGER" env. to "cat".
+
+    $ uftrace replay
+    # DURATION    TID     FUNCTION
+       2.217 us [22071] | __monstartup();
+       2.274 us [22071] | __cxa_atexit();
+                [22071] | main() {
+                [22071] |   foo() {
+       0.234 us [22071] |     bar();
+       1.264 us [22071] |   } /* foo */
+      68.900 us [22071] |   pthread_create();
+                [22071] |   pthread_join() {
+                [22073] | foo() {
+       0.241 us [22073] |   bar();
+       1.819 us [22073] | } /* foo */
+     204.783 us [22071] |   } /* pthread_join */
+     278.739 us [22071] | } /* main */
+
+You can see only specific thread(s) by using `--tid` option.
+
+    $ uftrace replay --tid 22073
+    # DURATION    TID     FUNCTION
+                [22073] | foo() {
+       0.241 us [22073] |   bar();
+       1.819 us [22073] | } /* foo */
+
+There's also `--column-view` option to make it easy to distinguish different threads/processes like below:
+
+    $ uftrace replay --column-view
+    # DURATION    TID     FUNCTION
+       2.217 us [22071] | __monstartup();
+       2.274 us [22071] | __cxa_atexit();
+                [22071] | main() {
+                [22071] |   foo() {
+       0.234 us [22071] |     bar();
+       1.264 us [22071] |   } /* foo */
+      68.900 us [22071] |   pthread_create();
+                [22071] |   pthread_join() {
+                [22073] |                 foo() {
+       0.241 us [22073] |                   bar();
+       1.819 us [22073] |                 } /* foo */
+     204.783 us [22071] |   } /* pthread_join */
+     278.739 us [22071] | } /* main */
