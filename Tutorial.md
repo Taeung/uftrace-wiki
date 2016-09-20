@@ -1,5 +1,5 @@
 #basic usage
-The uftrace tool consists of several subcommands.  We'll see how to use them with simple examples in this document.
+The uftrace tool consists of several subcommands.  We'll see how to use them with simple examples in this document. Note that this document is still work in progress and based on the v0.6 of uftrace.
 
 ## Getting started
 The first subcommand to look at is the `live`.  It's a default subcommand and will be used if you don't give other subcommand when running uftrace (So it's same to run "uftrace xxx" and "uftrace live xxx").  It's basically same as running `record` and then `replay` subcommands in a row.  That means it'd show the output after a program (given on the command line) finished.  Below is the familiar "hello world" program.
@@ -47,7 +47,7 @@ As you already know, you can give the program name on the command line.
 
 However it'll show the following error message and exit.
 
-    ftrace: /home/namhyung/project/uftrace/cmd-record.c:1271:check_binary
+    uftrace: /home/namhyung/project/uftrace/cmd-record.c:1271:check_binary
      ERROR: Cannot trace 'pwd': No such file
             Note that ftrace doesn't search $PATH for you.
             If you really want to trace executables in the $PATH,
@@ -56,7 +56,7 @@ However it'll show the following error message and exit.
 This is because it doesn't search directories in the PATH environment variable for you.  In order to run with uftrace, the program needs to be built with the compiler instrumentation.  But programs in the PATH are usually not.  So you need to give the full path to run if you really want to run it with the uftrace.  Let's do this:
 
     $ uftrace record `which pwd`
-    ftrace: /home/namhyung/project/uftrace/cmd-record.c:1307:check_binary
+    uftrace: /home/namhyung/project/uftrace/cmd-record.c:1307:check_binary
      ERROR: Can't find 'mcount' symbol in the '/usr/bin/pwd'.
             It seems not to be compiled with -pg or -finstrument-functions flag
             which generates traceable code.  Please check your binary file.
