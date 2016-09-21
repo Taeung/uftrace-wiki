@@ -104,7 +104,7 @@ One is function-level filters and works on the name of functions.  You can use `
        6.522 us [27132] |   puts();
        8.744 us [27132] | } /* main */
 
-The next is function-depth filter.  You can use `-D` or `--depth` to limit function call depth to be recorded.  Below is apply depth-2 filter on the uftrace itself when replay the hello world program.  The uftrace-pg is built with the compiler instrumentation and the trace data is in hello.data.  The "--" in the command line is to tell the option parser that it's the end of the option.  For simplicity, I omitted the output of replaying hello world:
+The next is function-depth filter.  You can use `-D` or `--depth` to limit function call depth to be recorded.  Below is apply depth-2 filter on the uftrace itself when replay the hello world program.  To make it clearer, I named the binary built with the compiler instrumentation as "uftrace-pg" and assume the trace data is in hello.data.  The "--" in the command line is to tell the option parser that it's the end of the option.  For simplicity, I omitted the output of replaying hello world from the uftrace-pg:
 
     $ uftrace -D 2 -- uftrace-pg replay -d hello.data
      ... output from (uftrace-pg replay) ...
