@@ -271,6 +271,8 @@ Sometimes functions are called more than once and you want to know the average e
 
 In this average mode, the available sort keys are different: "min", "max" and "avg" (default).
 
+Note that the `live` subcommand also has a `--report` option to show this style of output before the replay.
+
 Sometimes you might want to focus on a single function, like how it was called (backtrace) and what functions it calls (children).  The `graph` command shows you such information.  For example, let's see function call graph of the "foo":
 
     $ uftrace graph foo
