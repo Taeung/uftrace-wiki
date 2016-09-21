@@ -315,3 +315,32 @@ It first shows the backtrace of "foo", one is from "main" and the other is calle
      204.783 us :  +-(1) pthread_join
 
 As you can see, if you omit the command line argument (function name), it'll show "main" function by default.  It has a single backtrace and called 3 functions - "foo", "pthread_create" and "pthread_join".  The "bar" was called from "foo" (which is called from "main" of course) in this case.  As it only focuses on the "main", "foo" (and "bar") called from the different thread wasn't shown here.
+
+Finally, uftrace can show various information about the system or the program during the execution which might helpful for developers.  The output of `info` subcommand will look like following:
+
+    $ uftrace info
+    # system information
+    # ==================
+    # program version     : uftrace v0.6
+    # recorded on         : Tue Sep 20 17:10:18 2016
+    # cmdline             : uftrace record foobar 
+    # cpu info            : Intel(R) Core(TM) i7-2640M CPU @ 2.80GHz
+    # number of cpus      : 4 / 4 (online / possible)
+    # memory info         : 7.8 / 15.5 GB (free / total)
+    # system load         : 0.06 / 0.11 / 0.18 (1 / 5 / 15 min)
+    # kernel version      : Linux 4.7.3-2-ARCH
+    # hostname            : danjae
+    # distro              : "Arch Linux"
+    #
+    # process information
+    # ===================
+    # number of tasks     : 2
+    # task list           : 22073, 22071
+    # exe image           : /home/namhyung/tmp/foobar
+    # build id            : 889a0105318f2c41aa5e9380fb480d2cc4f362b4
+    # exit status         : exited with code: 0
+    # cpu time            : 0.003 / 0.000 sec (sys / user)
+    # context switch      : 2 / 1 (voluntary / involuntary)
+    # max rss             : 3172 KB
+    # page fault          : 0 / 198 (major / minor)
+    # disk iops           : 0 / 16 (read / write)
