@@ -1,5 +1,5 @@
 #basic usage
-The uftrace tool consists of several subcommands.  We'll see how to use them with simple examples in this document. Note that this document is still work in progress and based on the v0.6 of uftrace.
+The uftrace tool consists of several subcommands.  We'll see how to use them with simple examples in this document. Note that this document is still work in progress and based on behavior of the latest version of uftrace.
 
 ## Getting started
 The first subcommand to look at is the `live`.  It's a default subcommand and will be used if you don't give other subcommand when running uftrace (So it's same to run "uftrace xxx" and "uftrace live xxx").  It's basically same as running `record` and then `replay` subcommands in a row.  That means it'd show the output after a program (given on the command line) finished.  Below is the familiar "hello world" program.
@@ -270,3 +270,47 @@ Sometimes functions are called more than once and you want to know the average e
         0.237 us    0.234 us    0.241 us  bar
 
 In this average mode, the available sort keys are different: "min", "max" and "avg" (default).
+
+Sometimes you might want to focus on a single function, like how it was called (backtrace) and what functions it calls (children).  The `graph` command shows you such information.  For example, let's see function call graph of the "foo":
+
+    $ uftrace graph foo
+    #
+    # function graph for 'foo' (session: beb2ed6a788e3fc6)
+    #
+    
+    backtrace
+    ================================
+     backtrace #0: hit 1, time   1.264 us
+       [0] main (0x40073b)
+       [1] foo (0x40071c)
+    
+     backtrace #1: hit 1, time   1.819 us
+       [0] foo (0x40071c)
+    
+    calling functions
+    ================================
+       3.083 us : (2) foo
+       0.475 us : (2) bar
+
+It first shows the backtrace of "foo", one is from "main" and the other is called directly (from the new thread).  Also it shows that the "foo" is called twice and then it also calls "bar" twice.  Below is a graph of "main" function:
+
+    #
+    # function graph for 'main' (session: beb2ed6a788e3fc6)
+    #
+    
+    backtrace
+    ================================
+     backtrace #0: hit 1, time 278.739 us
+       [0] main (0x40073b)
+    
+    calling functions
+    ================================
+     278.739 us : (1) main
+       1.264 us :  +-(1) foo
+       0.234 us :  | (1) bar
+                :  | 
+      68.900 us :  +-(1) pthread_create
+                :  | 
+     204.783 us :  +-(1) pthread_join
+
+It has a single backtrace and called 3 functions - "foo", "pthread_create" and "pthread_join".  The "bar" was called from "foo" (which is called from "main" of course) in this case.  As it only focuses on the "main", "foo" (and "bar") called from the different thread wasn't shown here.
