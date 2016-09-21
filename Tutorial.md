@@ -228,3 +228,45 @@ There's also `--column-view` option to make it easy to distinguish different thr
        1.819 us [22073] |                 } /* foo */
      204.783 us [22071] |   } /* pthread_join */
      278.739 us [22071] | } /* main */
+
+## Analyzing the trace
+With the trace data you recorded above, uftrace provides a couple of subcommands to analyze the program execution.  The `report` subcommand shows statistics of each function in the program sorted by (total) time executed.
+
+    $ uftrace report
+      Total time   Self time       Calls  Function
+      ==========  ==========  ==========  ====================================
+      278.739 us    3.792 us           1  main
+      204.783 us  204.783 us           1  pthread_join
+       68.900 us   68.900 us           1  pthread_create
+        3.083 us    2.608 us           2  foo
+        2.274 us    2.274 us           1  __cxa_atexit
+        2.217 us    2.217 us           1  __monstartup
+        0.475 us    0.475 us           2  bar
+
+The total time is a duration of the function including (child) functions called in it.  The self time is a duration excluding the child functions.  If the function is called multiple times, it's a sum of duration.  You can use `-s` or `--sort` option to change the sorting behavior.  Available sort keys are: "total" (default), "self" and "call".  Below is the same trace but sorted by the self time.
+
+    $ uftrace report -s self
+      Total time   Self time       Calls  Function
+      ==========  ==========  ==========  ====================================
+      204.783 us  204.783 us           1  pthread_join
+       68.900 us   68.900 us           1  pthread_create
+      278.739 us    3.792 us           1  main
+        3.083 us    2.608 us           2  foo
+        2.274 us    2.274 us           1  __cxa_atexit
+        2.217 us    2.217 us           1  __monstartup
+        0.475 us    0.475 us           2  bar
+
+Sometimes functions are called more than once and you want to know the average execution time of the function.  In the above example, the "foo" and "bar" functions are called twice - once from the main thread another from the newly created thread.  For this, uftrace provides `--avg-total` and `--avg-self` option to see average of the total or self time.
+
+    $ uftrace report --avg-total
+       Avg total   Min total   Max total  Function
+      ==========  ==========  ==========  ====================================
+      278.739 us  278.739 us  278.739 us  main
+      204.783 us  204.783 us  204.783 us  pthread_join
+       68.900 us   68.900 us   68.900 us  pthread_create
+        2.274 us    2.274 us    2.274 us  __cxa_atexit
+        2.217 us    2.217 us    2.217 us  __monstartup
+        1.541 us    1.264 us    1.819 us  foo
+        0.237 us    0.234 us    0.241 us  bar
+
+In this average mode, the available sort keys are different: "min", "max" and "avg" (default).
