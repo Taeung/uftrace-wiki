@@ -294,6 +294,7 @@ Sometimes you might want to focus on a single function, like how it was called (
 
 It first shows the backtrace of "foo", one is from "main" and the other is called directly (from the new thread).  Also it shows that the "foo" is called twice and then it also calls "bar" twice.  Below is a graph of "main" function:
 
+    $ uftrace graph
     #
     # function graph for 'main' (session: beb2ed6a788e3fc6)
     #
@@ -313,4 +314,4 @@ It first shows the backtrace of "foo", one is from "main" and the other is calle
                 :  | 
      204.783 us :  +-(1) pthread_join
 
-It has a single backtrace and called 3 functions - "foo", "pthread_create" and "pthread_join".  The "bar" was called from "foo" (which is called from "main" of course) in this case.  As it only focuses on the "main", "foo" (and "bar") called from the different thread wasn't shown here.
+As you can see, if you omit the command line argument (function name), it'll show "main" function by default.  It has a single backtrace and called 3 functions - "foo", "pthread_create" and "pthread_join".  The "bar" was called from "foo" (which is called from "main" of course) in this case.  As it only focuses on the "main", "foo" (and "bar") called from the different thread wasn't shown here.
