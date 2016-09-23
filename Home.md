@@ -32,7 +32,7 @@ The uftrace depends on libelf from elfutils (plus a couple of optional libraries
 For more information, please refer [INSTALL.md](https://github.com/namhyung/uftrace/blob/master/INSTALL.md) page.
 
 ## Tutorials
-TODO
+* [Tutorial in this wiki](../Tutorial)
 
 ## Man pages
 * [uftrace](https://github.com/namhyung/uftrace/blob/master/doc/uftrace.md) - uftrace overview
