@@ -33,6 +33,7 @@ For more information, please refer [INSTALL.md](https://github.com/namhyung/uftr
 
 ## Tutorials
 * [Tutorial in this wiki](Tutorial)
+* [CppCon 2016 lighting talk](https://github.com/CppCon/CppCon2016/blob/master/Lightning%20Talks%20and%20Lunch%20Sessions/uftrace%20-%20A%20function%20graph%20tracer%20C%20C%2B%2B%20userspace%20programs/uftrace%20-%20A%20function%20graph%20tracer%20C%20C%2B%2B%20userspace%20programs%20-%20Namhyung%20Kim%20and%20Honggyu%20Kim%20-%20CppCon%202016.pdf)
 
 ## Man pages
 * [uftrace](https://github.com/namhyung/uftrace/blob/master/doc/uftrace.md) - uftrace overview
