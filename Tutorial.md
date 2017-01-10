@@ -119,7 +119,7 @@ The last type of filter is a time-based one.  It will show functions running lon
     $ uftrace -t 5us hello
     # DURATION    TID     FUNCTION
                 [27154] | main() {
-       5.027 us [27132] |   puts();
+       5.027 us [27154] |   puts();
        6.280 us [27154] | } /* main */
 
 Above shows functions run longer than 5 micro-second (us).  Note that the output when using time filter can be vary for each run due to the various timing issues.  You can also give other units like ns, ms, s or m for nano-second, milli-second, second and minute respectively.  If you omit the unit, it defaults to the "ns".  Please do not put a whitespace between number and unit.
