@@ -41,6 +41,8 @@ Now you can see only the "main" function - you wrote it only, right? :)   The "H
 ## Recording trace data
 The uftrace needs to collect trace data in order to analyze the program execution.  Many subcommand in uftrace requires the data to run.  The `record` subcommand saves the trace data in the "uftrace.data" directory by default, and other subcommands use it.  You can use `-d` or `--data` option to use different name.
 
+Note that you should give uftrace options before the (path of) your program.  The uftrace stops processing command line options when it sees a non-option argument and passes the rest to the program as is.
+
 As you already know, you can give the program name on the command line.
 
     $ uftrace record pwd
