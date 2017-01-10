@@ -106,43 +106,23 @@ One is function-level filters and works on the name of functions.  You can use `
        6.522 us [27132] |   puts();
        8.744 us [27132] | } /* main */
 
-The next is function-depth filter.  You can use `-D` or `--depth` to limit function call depth to be recorded.  Below is apply depth-2 filter on the uftrace itself when replay the hello world program.  To make it clearer, I named the binary built with the compiler instrumentation as "uftrace-pg" and assume the trace data is in hello.data.  The "--" in the command line is to tell the option parser that it's the end of the option.  For simplicity, I omitted the output of replaying hello world from the uftrace-pg:
+The next is function-depth filter.  You can use `-D` or `--depth` to limit function call depth to be recorded (or replayed).  Below example applies depth-1 filter which shows functions only called in a top level:
 
-    $ uftrace -D 2 -- uftrace-pg replay -d hello.data
-     ... output from (uftrace-pg replay) ...
+    $ uftrace -D 1 hello
     # DURATION    TID     FUNCTION
-       2.630 us [27091] | __cxa_atexit();
-                [27091] | main() {
-      46.440 us [27091] |   argp_parse();
-       4.925 us [27091] |   setup_color();
-       3.124 us [27091] |   setup_signal();
-       2.185 us [27091] |   start_pager();
-     444.797 us [27091] |   command_replay();
-       0.127 us [27091] |   wait_for_pager();
-     513.493 us [27091] | } /* main */
+       1.630 us [27091] | __monstartup();
+       0.917 us [27091] | __cxa_atexit();
+       7.493 us [27091] | main();
 
 The last type of filter is a time-based one.  It will show functions running longer than the specified time.  Usually short-running functions are out of interest when analyzing program execution so it's useful to remove those function at once.  You can use `-t` or `--time-filter` option like below:
 
-    $ uftrace -t 100us  uftrace-pg replay -d hello.data
-     ... output from (uftrace-pg replay) ...
+    $ uftrace -t 5us hello
     # DURATION    TID     FUNCTION
                 [27154] | main() {
-                [27154] |   command_replay() {
-                [27154] |     open_data_file() {
-     134.230 us [27154] |       read_ftrace_info();
-                [27154] |       read_task_txt_file() {
-                [27154] |         create_session() {
-     321.755 us [27154] |           read_map_file();
-                [27154] |           load_symtabs() {
-     120.350 us [27154] |             load_symbol_file();
-     148.726 us [27154] |           } /* load_symtabs */
-     478.026 us [27154] |         } /* create_session */
-     535.897 us [27154] |       } /* read_task_txt_file */
-     715.152 us [27154] |     } /* open_data_file */
-     963.311 us [27154] |   } /* command_replay */
-       1.080 ms [27154] | } /* main */
+       5.027 us [27132] |   puts();
+       6.280 us [27154] | } /* main */
 
-Above show functions run longer than 100 us when replaying the hello world program.  You can see that reading map file and symbol file takes most of time.
+Above shows functions run longer than 5 micro-second (us).  Note that the output when using time filter can be vary for each run due to the various timing issues.  You can also give other units like ns, ms, s or m for nano-second, milli-second, second and minute respectively.  If you omit the unit, it defaults to the "ns".  Please do not put a whitespace between number and unit.
 
 In addition, it can also access function arguments and return value.  You can use the `-A` or `--argument` option to access the arguments and likewise, `-R` or `--return` option for return value.  (Currently) it needs to pass function name and argument/return value specifier(s).
 
