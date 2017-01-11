@@ -84,7 +84,7 @@ $ uftrace -A add1@arg1 -A atoi@arg1  a.out -1
    4.636 us [13522] | } /* main */
 ```
 
-As you can see, it's printed as a hex number.  But it's actually a pointer to string so you can use 's' modifier to show it as a string instead:
+As you can see, it's printed as a hex number (without the 'x' modifier).  But it's actually a pointer to string so you can use 's' modifier to show it as a string instead:
 
 ```
 $ uftrace -A atoi@arg1/s  a.out -1
