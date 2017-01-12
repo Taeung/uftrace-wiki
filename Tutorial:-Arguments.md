@@ -160,16 +160,30 @@ As you can see, main and add1 functions both showed the first argument.  But wha
 
 The answer is that they are functions in a other library (module) not in the main executable (the a.out binary).  In fact, those library function are called through PLT (Procedure Linkage Table) and uftrace intercepts the calls at PLT.  When pattern matching is done, it first tries to match the pattern to functions in the main binary.  If it doesn't match to anything, it then looks up the PLT function calls.  This was changed in the latest code in github to match PLT functions always.
 
-If you want to specify functions only in the main binary or PLT, you can give the module name after the "@" sign.  The module name is a (base)name of the file or "PLT".  Below shows arguments only in the PLT functions:
+If you want to specify functions only in the main binary or PLT, you can give the module name after the "@" sign.  The module name is a (base)name of the file or "PLT".  Below shows arguments of functions only in the a.out binary:
 
 ```
-$ uftrace -A .@PLT,arg1  a.out 2
+$ uftrace -A .@a.out,arg1  a.out 3
 # DURATION    TID     FUNCTION
-   3.086 us [22462] | __monstartup(0x4004e0);
-   1.263 us [22462] | __cxa_atexit(0x7f03e34aa5b0);
-            [22462] | main() {
-   1.173 us [22462] |   atoi(0x7fffcd203d7e);
-   0.180 us [22462] |   add1();
-   0.116 us [22462] |   add1();
+   3.086 us [22462] | __monstartup();
+   1.263 us [22462] | __cxa_atexit();
+            [22462] | main(2) {
+   1.173 us [22462] |   atoi();
+   0.180 us [22462] |   add1(3);
+   0.116 us [22462] |   add1(4);
    3.446 us [22462] | } /* main */
+```
+
+Similarly, below shows arguments of the PLT functions only:
+
+```
+$ uftrace -A .@PLT,arg1  a.out 3
+# DURATION    TID     FUNCTION
+   2.027 us [22484] | __monstartup(0x4004e0);
+   1.387 us [22484] | __cxa_atexit(0x7f03e34aa5b0);
+            [22484] | main() {
+   1.275 us [22484] |   atoi(0x7fffcd203d7e);
+   0.158 us [22484] |   add1();
+   0.173 us [22484] |   add1();
+   3.692 us [22484] | } /* main */
 ```
