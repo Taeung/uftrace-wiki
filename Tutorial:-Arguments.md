@@ -116,7 +116,20 @@ $ uftrace -A atoi@arg1/s -R atoi@retval/x32  a.out -1
 
 Note that it needs "retval" specifier for return value rathen than "argN".
 
-## Pattern matching and module name
+It's also possible to give more than one argument specifier at once.
+
+```
+$ uftrace -A main@arg1,arg2  a.out
+# DURATION    TID     FUNCTION
+   2.070 us [14268] | __monstartup();
+   1.154 us [14268] | __cxa_atexit();
+            [14268] | main(1, 0x7ffee7efc888) {
+   0.186 us [14268] |   add1();
+   0.117 us [14268] |   add1();
+   3.190 us [14268] | } /* main */
+```
+
+## Pattern matching and library calls
 Instead of giving full function name, you can use a regex pattern to match multiple functions.  When uftrace detects any letter used in regex special characters it treat the name as a regex pattern.  Following example will show arguments of functions which their name start with 'a':
 
 ```
@@ -133,6 +146,7 @@ $ uftrace -A ^a@arg1  a.out
 One way to set all functions to display the argument is to use '.' as a pattern.  As regex matches it to any character and it ok to match partially, it would show argument of all(?) functions.
 
 ```
+$ uftrace -A .@arg1  a.out
 # DURATION    TID     FUNCTION
    1.806 us [ 9467] | __monstartup();
    1.117 us [ 9467] | __cxa_atexit();
@@ -144,4 +158,18 @@ One way to set all functions to display the argument is to use '.' as a pattern.
 
 As you can see, main and add1 functions both showed the first argument.  But what about "__monstartup" and "__cxa_atexit"?
 
-The answer is they are functions in a other library (module) not the main executable (the a.out binary).
+The answer is that they are functions in a other library (module) not in the main executable (the a.out binary).  In fact, those library function are called through PLT (Procedure Linkage Table) and uftrace intercepts the calls at PLT.  When pattern matching is done, it first tries to match the pattern to functions in the main binary.  If it doesn't match to anything, it then looks up the PLT function calls.  This was changed in the latest code in github to match PLT functions always.
+
+If you want to specify functions only in the main binary or PLT, you can give the module name after the "@" sign.  The module name is a (base)name of the file or "PLT".  Below shows arguments only in the PLT functions:
+
+```
+$ uftrace -A .@PLT,arg1  a.out 2
+# DURATION    TID     FUNCTION
+   3.086 us [22462] | __monstartup(0x4004e0);
+   1.263 us [22462] | __cxa_atexit(0x7f03e34aa5b0);
+            [22462] | main() {
+   1.173 us [22462] |   atoi(0x7fffcd203d7e);
+   0.180 us [22462] |   add1();
+   0.116 us [22462] |   add1();
+   3.446 us [22462] | } /* main */
+```
