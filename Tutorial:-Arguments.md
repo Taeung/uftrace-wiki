@@ -100,7 +100,7 @@ $ uftrace -A atoi@arg1/s  a.out -1
 
 Beware when using the 's' modifier since it can crash your program if the given address is not valid.
 
-Also you can specify size (in bit) of arguments.  For example, "i32" means a 32-bit signed integer (int) and "f64" means a 64-bit floating-point number (double).  The string and character type modifiers don't accept the size.  This can be used to the return value as well.  With `-R` option uftrace displays the return value:
+Also you can specify size (in bit) of arguments.  For example, "i32" means a 32-bit signed integer (int) and "f64" means a 64-bit floating-point number (double).  The string and character type modifiers ('s' and 'c' respectively) don't accept the size.  This can be used to the return value as well.  With `-R` option uftrace displays the return value:
 
 ```
 $ uftrace -A atoi@arg1/s -R atoi@retval/x32  a.out -1
@@ -113,3 +113,35 @@ $ uftrace -A atoi@arg1/s -R atoi@retval/x32  a.out -1
    0.140 us [13672] |   add1();
    5.330 us [13672] | } /* main */
 ```
+
+Note that it needs "retval" specifier for return value rathen than "argN".
+
+## Pattern matching and module name
+Instead of giving full function name, you can use a regex pattern to match multiple functions.  When uftrace detects any letter used in regex special characters it treat the name as a regex pattern.  Following example will show arguments of functions which their name start with 'a':
+
+```
+$ uftrace -A ^a@arg1  a.out
+# DURATION    TID     FUNCTION
+   1.973 us [ 8833] | __monstartup();
+   1.140 us [ 8833] | __cxa_atexit();
+            [ 8833] | main() {
+   1.040 us [ 8833] |   add1(1);
+   0.210 us [ 8833] |   add1(2);
+   2.766 us [ 8833] | } /* main */
+```
+
+One way to set all functions to display the argument is to use '.' as a pattern.  As regex matches it to any character and it ok to match partially, it would show argument of all(?) functions.
+
+```
+# DURATION    TID     FUNCTION
+   1.806 us [ 9467] | __monstartup();
+   1.117 us [ 9467] | __cxa_atexit();
+            [ 9467] | main(1) {
+   0.237 us [ 9467] |   add1(1);
+   0.170 us [ 9467] |   add1(2);
+   2.913 us [ 9467] | } /* main */
+```
+
+As you can see, main and add1 functions both showed the first argument.  But what about "__monstartup" and "__cxa_atexit"?
+
+The answer is they are functions in a other library (module) not the main executable (the a.out binary).
