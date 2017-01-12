@@ -158,7 +158,7 @@ $ uftrace -A .@arg1  a.out
 
 As you can see, main and add1 functions both showed the first argument.  But what about "__monstartup" and "__cxa_atexit"?
 
-The answer is that they are functions in a other library (module) not in the main executable (the a.out binary).  In fact, those library function are called through PLT (Procedure Linkage Table) and uftrace intercepts the calls at PLT.  When pattern matching is done, it first tries to match the pattern to functions in the main binary.  If it doesn't match to anything, it then looks up the PLT function calls.  This was changed in the latest code in github to match PLT functions always.
+The answer is that they are functions in a other library (module) not in the main executable (the a.out binary).  In fact, those library function are called through PLT (Procedure Linkage Table) and uftrace intercepts the calls at PLT.  When pattern matching is done, it first tries to match the pattern to functions in the main binary.  If it found no match, it then looks up the PLT function calls.  This was changed in the latest code (in git commit 06309be) to match PLT functions unless a specific module name was given like below.
 
 If you want to specify functions only in the main binary or PLT, you can give the module name after the "@" sign.  The module name is a (base)name of the file or "PLT".  Below shows arguments of functions only in the a.out binary:
 
