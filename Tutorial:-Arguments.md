@@ -187,3 +187,53 @@ $ uftrace -A .@PLT,arg1  a.out 3
    0.173 us [22484] |   add1();
    3.692 us [22484] | } /* main */
 ```
+
+## Floating-point arguments and more
+Some CPU architectures, notably x86_64, pass floating-pointer arguments differently and the above way of specifying arguments won't work for them.  Thus uftrace provides "fpargN" syntax for the floating-point numbers.
+
+Note that the index is counted separately to the normal arguments.  Let's look at the example below:
+
+```
+$ cat circle.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+double circumference(int radius, double pi)
+{
+  return 2 * pi * radius;
+}
+
+double area(int radius, double pi)
+{
+  return pi * radius * radius;
+}
+
+int main(int argc, char *argv[])
+{
+  int r = 1;
+
+  if (argc > 1)
+    r = atoi(argv[1]);
+
+  circumference(r, M_PI);
+  area(r, M_PI);
+  return 0;
+}
+
+$ gcc -o circle -pg circle.c -lm
+```
+
+The circumference() and area() of the circle passes an integer argument and a floating-point argument.  You can see them using following command.
+
+```
+$ uftrace -A 'circumfence|area@arg1,fparg1' -R '^[ac]@retval/f64' circle
+# DURATION    TID     FUNCTION
+   2.059 us [28090] | __cxa_atexit();
+            [28090] | main() {
+   1.384 us [28090] |   circumference(1, 3.141593) = 6.283185;
+   0.348 us [28090] |   area(1, 3.141593) = 3.141593;
+   3.552 us [28090] | } /* main */
+```
+
+As you can see the second argument (pi) is the first floating-point argument, hence the "fparg1".  The return value specification is similar but it doesn't have a separate "fpretval" and uses the "f" modifier instead.
