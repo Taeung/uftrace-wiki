@@ -237,3 +237,32 @@ $ uftrace -A 'circumfence|area@arg1,fparg1' -R '^[ac]@retval/f64' circle
 ```
 
 As you can see the second argument (pi) is the first floating-point argument, hence the "fparg1".  The return value specification is similar but it doesn't have a separate "fpretval" and uses the "f" modifier instead.
+
+Depending on the calling convention of an architecture, these mixture of integer and floating-point argument passing can be complex and hard to know from uftrace.  The above form of "argN" and "fpargN" is a syntax-sugar and works well for (most) simple cases.
+
+Therefore, uftrace provides another way to specify arguments at a low-level.  According to the calling convention, arguments are passed using either of registers and stacks.  You can give names of the registers or offset to stack preceded by a '%' to specify how uftrace to know the arguments. Essentially using argN or fpargN is same as follows:
+
+### x86_64
+* arg1: %rdi
+* arg2: %rsi
+* arg3: %rdx
+* arg4: %rcx
+* arg5: %r8
+* arg6: %r9
+* arg7: %stack+1
+* arg8: %stack+2
+* ...
+* fparg1: %xmm0
+* fparg2: %xmm1
+* ...
+
+### ARM
+* arg1: %r0
+* arg2: %r1
+* arg3: %r2
+* arg4: %r3
+* arg5: %stack+1
+* arg6: %stack+2
+* ...
+
+Floating-point handling in ARM is much more complex and depends on which ABI the toolchain is used.  You can use `%s0` to `%s15` and/or `%d0` to `%d7` if hardfp ABI is used.
