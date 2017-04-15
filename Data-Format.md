@@ -26,4 +26,32 @@ The info file provides metadata about the format as well as process and system i
 * And then it followed by a 2-byte number of maximum function call (stack) depth given by user.
 * The rest 6-byte is reserved for future use and should be filled with zero.
 
+The metadata is maintained as `struct uftrace_file_header` in the uftrace.h file.
+
 After the metadata, info string follows in a "key:value" form.  Basically a single bit in the info_mask corresponds to a single line in the info string.  If it consists of two or more lines, the first line should tell how many lines comes after it.  The `uftrace info` command will also show those info string in more readable format.
+
+# The task.txt file
+This files shows relation between tasks and sessions.  A session keeps a memory map of tasks which can be created when the (first) task was started or a new program was executed (by `exec(3)`).  When a child task was forked, it inherits the session of parent (since it's memory mapping will be same unless child adds or removes mappings).  So a session can be shared by multiple tasks and also a single task can have multiple sessions.  The task.txt saves task (parent-child relationship) and session info with timestamp so that it can track the correct mappings.
+
+A very simple trace data will contain a session and a task only like the below example:
+
+```
+$ cat uftrace.data/task.txt
+SESS timestamp=31350.640973607 pid=30062 sid=c16f4200bb3a26fa exename="/home/namhyung/tmp/hello"
+TASK timestamp=31350.641120290 tid=30062 pid=30062
+```
+
+When a task calls `dlopen(3)` to load a library dynamically, new memory mappings will be created and it needs to be recorded.  Instead of creating a new session for dlopen, a "DLOP" line will be added to the task.txt file with a name of the library and a base address where the library was loaded.
+
+# The session .map file
+As you can see the above example, a session has a session id (sid) for identity.  The session id a random 16-character string (or 8-byte hex number) and it's used as a file name of the map file.  A session contains memory mapping of tasks which provides base address of each module (library or executable).  It's actually a copy of a /proc/<tid>/maps file.
+
+# The symbol (.sym) file
+The uftrace saves the symbol table of the traced program so that it can resolve the symbol from address easily.  The symbol file contains only function symbols and its format is almost identical to the output of `nm(1)` command.  The difference is that it also saves PLT entries which is used to call library functions and it has 'P' type.
+
+# The data (.dat) file
+The data file contains actual trace data (record) for each task so the task id (tid) will be used as a file name.  The data is two 64-bit numbers - first is a timestamp in nsec and second consists of 2-bit type, 1-bit marker, 3-bit magic, 10-bit depth and 48-bit address.
+
+The type is one of 'ENTRY', 'EXIT', 'EVENT' or 'LOST'.  The 'ENTRY' and 'EXIT' types are for function tracing and 'EVENT' type is reserved for event tracing like kernel-level tracepoint or user-level SDT.  The 1-bit marker is whether this record has additional data (like argument or return value).  The 3-bit magic is for data integrity and it should have a value of 5 (or `0b101`). The 10-bit depth shows the function call depth (or level).  And finally 48-bit address is to identify function (symbol); it's ok as most 64-bit systems only use 48-bit address space for now.
+
+You can see the definition of the data record as `struct uftrace_record` in `uftrace.h` file.
