@@ -116,7 +116,27 @@ ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsysca
 ```
 
 # The symbol (.sym) file
-The uftrace saves the symbol table of the traced program so that it can resolve the symbol from address easily.  The symbol file contains only function symbols and its format is almost identical to the output of `nm(1)` command.  The difference is that it also saves PLT entries which is used to call library functions and it has 'P' type.
+The uftrace saves the symbol table of the traced program so that it can resolve the symbol from address easily.  The symbol file contains only function symbols and its format is almost identical to the output of `nm(1)` command.  The difference is that it also saves PLT entries which is used to call library functions and it has 'P' type.  You can see the below example.
+```
+$ cat uftrace.data/t-abc.sym
+00000000000004e0 P getpid
+00000000000004f0 P __libc_start_main
+0000000000000500 P __monstartup
+0000000000000510 P mcount
+0000000000000520 P __cxa_atexit
+0000000000000530 P atoi
+0000000000000540 P __dynsym_end
+0000000000000540 T _start
+0000000000000570 T __gmon_start__
+0000000000000667 t a
+000000000000067a t b
+000000000000068d t c
+00000000000006be T main
+0000000000000710 T __libc_csu_init
+0000000000000780 T __libc_csu_fini
+0000000000000790 T atexit
+00000000000007b9 T __sym_end
+```
 
 # The data (.dat) file
 The data file contains actual trace data (record) for each task so the task id (tid) will be used as a file name.  The data is two 64-bit numbers - first is a timestamp in nsec and second consists of 2-bit type, 1-bit marker, 3-bit magic, 10-bit depth and 48-bit address.
