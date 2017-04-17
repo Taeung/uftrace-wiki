@@ -87,8 +87,8 @@ A very simple trace data will contain a session and a task only like the below e
 
 ```
 $ cat uftrace.data/task.txt
-SESS timestamp=31350.640973607 pid=30062 sid=c16f4200bb3a26fa exename="/home/namhyung/tmp/hello"
-TASK timestamp=31350.641120290 tid=30062 pid=30062
+SESS timestamp=42622.893819172 pid=24290 sid=5951ceee0be7fb17 exename="/home/taeung/git/uftrace/tests/t-abc"
+TASK timestamp=42622.893967350 tid=24290 pid=24290
 ```
 
 When a task calls `dlopen(3)` to load a library dynamically, new memory mappings will be created and it needs to be recorded.  Instead of creating a new session for dlopen, a "DLOP" line will be added to the task.txt file with a name of the library and a base address where the library was loaded.
