@@ -94,7 +94,26 @@ TASK timestamp=31350.641120290 tid=30062 pid=30062
 When a task calls `dlopen(3)` to load a library dynamically, new memory mappings will be created and it needs to be recorded.  Instead of creating a new session for dlopen, a "DLOP" line will be added to the task.txt file with a name of the library and a base address where the library was loaded.
 
 # The session .map file
-As you can see the above example, a session has a session id (sid) for identity.  The session id a random 16-character string (or 8-byte hex number) and it's used as a file name of the map file.  A session contains memory mapping of tasks which provides base address of each module (library or executable).  It's actually a copy of a /proc/\<TID\>/maps file.
+As you can see the above example, a session has a session id (sid) for identity.  The session id a random 16-character string (or 8-byte hex number) and it's used as a file name of the map file (e.g. sid-5951ceee0be7fb17.map).  A session contains memory mapping of tasks which provides base address of each module (library or executable).  It's actually a copy of a /proc/\<TID\>/maps file.
+
+For example, The uftrace copy the below output into the map file when TID of running target process is 24290.
+```
+$ cat /proc/24290/maps
+00400000-00401000 r-xp 00000000 08:01 11729337                           /home/taeung/git/uftrace/tests/t-abc
+00600000-00601000 rw-p 00000000 08:01 11729337                           /home/taeung/git/uftrace/tests/t-abc
+02443000-02475000 rw-p 00000000 00:00 0                                  [heap]
+...
+7fba87229000-7fba8722b000 rw-p 001c3000 08:01 9968358                    /lib/x86_64-linux-gnu/libc-2.23.so
+7fba8722b000-7fba8722f000 rw-p 00000000 00:00 0
+7fba8722f000-7fba87249000 r-xp 00000000 08:01 6558157                    /usr/local/lib/libmcount-fast.so
+...
+7fba87676000-7fba87677000 rw-p 00000000 00:00 0
+7ffe88f83000-7ffe88fa1000 rwxp 00000000 00:00 0                          [stack]
+7ffe88fa1000-7ffe88fa4000 rw-p 00000000 00:00 0
+7ffe88fbd000-7ffe88fc0000 r--p 00000000 00:00 0                          [vvar]
+7ffe88fc0000-7ffe88fc2000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+```
 
 # The symbol (.sym) file
 The uftrace saves the symbol table of the traced program so that it can resolve the symbol from address easily.  The symbol file contains only function symbols and its format is almost identical to the output of `nm(1)` command.  The difference is that it also saves PLT entries which is used to call library functions and it has 'P' type.
