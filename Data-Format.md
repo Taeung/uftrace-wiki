@@ -14,8 +14,35 @@ The uftrace data is saved under a directory (`uftrace.data` by default) and it c
 The actual trace data is saved in the .dat file.  It needs to resolve the addresses (in .dat file) to a symbol which was saved in the .sym file.  But the .sym file only has the relative offsets so it also needs to find a base address from a (per-session) .map file.  The task.txt file provides information that which (session) map should be used to resolve an address of a task at a given timestamp.
 
 # The info file
-The info file provides metadata about the format as well as process and system information at the time of the recording.  This file consists of two parts - the first is binary form of metadata and the second is text form of the information (which can be shown with `uftrace info` command).
-
+The info file provides metadata about the format as well as process and system information at the time of the recording.  This file consists of two parts - the first is binary form of metadata and the second is text form of the information (which can be shown with `uftrace info` command like the below example).
+```
+$ uftrace record tests/t-abc
+$ uftrace info
+# system information
+# ==================
+# program version     : uftrace v0.6.2-79-g3843
+# recorded on         : Mon Apr 17 10:39:32 2017
+# cmdline             : uftrace record tests/t-abc
+# cpu info            : Intel(R) Core(TM) i7-5500U CPU @ 2.40GHz
+# number of cpus      : 4 / 4 (online / possible)
+# memory info         : 0.1 / 7.4 GB (free / total)
+# system load         : 0.58 / 0.34 / 0.23 (1 / 5 / 15 min)
+# kernel version      : Linux 4.5.0-rc4+
+# hostname            : taeung-ThinkPad-X1-Carbon-3rd
+# distro              : "Ubuntu 16.04 LTS"
+#
+# process information
+# ===================
+# number of tasks     : 1
+# task list           : 24290
+# exe image           : /home/taeung/git/uftrace/tests/t-abc
+# exit status         : exited with code: 0
+# cpu time            : 0.000 / 0.004 sec (sys / user)
+# context switch      : 1 / 1 (voluntary / involuntary)
+# max rss             : 3272 KB
+# page fault          : 0 / 189 (major / minor)
+# disk iops           : 0 / 16 (read / write)
+```
 * The metadata starts with a 8-byte magic string which is `0x46 0x74 0x72 0x61 0x63 0x65 0x21 0x00` or `"Ftrace!"`.
 * It's followed by a 4-byte number of file version and the current version is `4`.
 * And then there's a 2-byte number of header (metadata) size and the current value is `40` (or `0x28`).
@@ -26,9 +53,32 @@ The info file provides metadata about the format as well as process and system i
 * And then it followed by a 2-byte number of maximum function call (stack) depth given by user.
 * The rest 6-byte is reserved for future use and should be filled with zero.
 
+For example, you can check the metadata like below.
+```
+$ hexdump -C uftrace.data/info |head -3
+00000000  46 74 72 61 63 65 21 00  04 00 00 00 28 00 01 02  |Ftrace!.....(...|
+00000010  63 00 00 00 00 00 00 00  fd 03 00 00 00 00 00 00  |c...............|
+00000020  00 04 00 00 00 00 00 00  65 78 65 6e 61 6d 65 3a  |........exename:|
+```
 The metadata is maintained as `struct uftrace_file_header` in the uftrace.h file.
 
-After the metadata, info string follows in a "key:value" form.  Basically a single bit in the info_mask corresponds to a single line in the info string.  If it consists of two or more lines, the first line should tell how many lines comes after it.  The `uftrace info` command will also show those info string in more readable format.
+After the metadata, info string follows in a "key:value" form.  For example, you can see it like below.
+```
+$ cat uftrace.data/info
+...
+cmdline:uftrace record tests/t-abc
+cpuinfo:lines=2
+cpuinfo:nr_cpus=4 / 4 (online/possible)
+cpuinfo:desc=Intel(R) Core(TM) i7-5500U CPU @ 2.40GHz
+meminfo:0.1 / 7.4 GB (free / total)
+osinfo:lines=3
+osinfo:kernel=Linux 4.5.0-rc4+
+osinfo:hostname=taeung-ThinkPad-X1-Carbon-3rd
+osinfo:distro="Ubuntu 16.04 LTS"
+taskinfo:lines=2
+...
+```
+Basically a single bit in the info_mask corresponds to a single line in the info string.  If it consists of two or more lines, the first line should tell how many lines comes after it.  The `uftrace info` command will also show those info string in more readable format.
 
 # The task.txt file
 This files shows relation between tasks and sessions.  A session keeps a memory map of tasks which can be created when the (first) task was started or a new program was executed (by `exec(3)`).  When a child task was forked, it inherits the session of parent (since it's memory mapping will be same unless child adds or removes mappings).  So a session can be shared by multiple tasks and also a single task can have multiple sessions.  The task.txt saves task (parent-child relationship) and session info with timestamp so that it can track the correct mappings.
