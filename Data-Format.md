@@ -94,7 +94,7 @@ TASK timestamp=31350.641120290 tid=30062 pid=30062
 When a task calls `dlopen(3)` to load a library dynamically, new memory mappings will be created and it needs to be recorded.  Instead of creating a new session for dlopen, a "DLOP" line will be added to the task.txt file with a name of the library and a base address where the library was loaded.
 
 # The session .map file
-As you can see the above example, a session has a session id (sid) for identity.  The session id a random 16-character string (or 8-byte hex number) and it's used as a file name of the map file.  A session contains memory mapping of tasks which provides base address of each module (library or executable).  It's actually a copy of a /proc/<tid>/maps file.
+As you can see the above example, a session has a session id (sid) for identity.  The session id a random 16-character string (or 8-byte hex number) and it's used as a file name of the map file.  A session contains memory mapping of tasks which provides base address of each module (library or executable).  It's actually a copy of a /proc/\<TID\>/maps file.
 
 # The symbol (.sym) file
 The uftrace saves the symbol table of the traced program so that it can resolve the symbol from address easily.  The symbol file contains only function symbols and its format is almost identical to the output of `nm(1)` command.  The difference is that it also saves PLT entries which is used to call library functions and it has 'P' type.
